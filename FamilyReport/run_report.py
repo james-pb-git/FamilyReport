@@ -14,8 +14,7 @@ class FamilyReport(object):
         pass
 
     def send_email(self):
-        sender = conf.sender
-        receivers = conf.receivers
+
         mail_msg = """
         <p>Test for family report</p>
         <p><a href="http://www.google.com">Search Google</a></p>
@@ -26,10 +25,18 @@ class FamilyReport(object):
         subject = 'SMTP Test'
         message['Subject'] = Header(subject, 'utf-8')
         try:
-            smtpObj = smtplib.SMTP('localhost')
-            smtpObj.sendmail(sender, receivers, message.as_string())
+            print("connect ...")
+            server = smtplib.SMTP('{host}:{port}'.format(name=conf.mail_host, port=conf.mail_port))
+            server.ehlo()
+            server.starttls()
+            print("login ...")
+            server.login(conf.sender, conf.mail_pswd)
+            print("send ...")
+            server.sendmail(conf.sender, conf.receivers, message.as_string())
+            server.quit()
             print("邮件发送成功")
-        except smtplib.SMTPException:
+        except smtplib.SMTPException as e:
+            print(e)
             print("Error: 无法发送邮件")
 
     def run(self):
