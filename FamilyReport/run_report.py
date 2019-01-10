@@ -6,7 +6,7 @@ from email.header import Header
 from email.utils import formataddr
 import pandas as pd
 import numpy as np
-import data.conf as conf
+from data import conf
 
 def days_between(d1, d2):
     d1 = datetime.datetime.strptime(d1, "%Y-%m-%d")
@@ -43,6 +43,8 @@ class FamilyReport(object):
 
         mail_msg = """
         <h3>This is an automatically generated email, however, you can reply if you insist.</h3>
+        <h3>To unsubscribe, please discuss with your husband in person.</h3>
+        <hr />
         <h2>Date information</h2>
         <p>Today is <b>{date}</b>, <b>{week}</b>, the {doy} day in this year.</p>
         <p>This year's progress is as follows: </p>
