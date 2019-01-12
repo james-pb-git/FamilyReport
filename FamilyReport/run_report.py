@@ -7,6 +7,7 @@ from email.utils import formataddr
 import pandas as pd
 import numpy as np
 from data import conf
+import requests
 
 def days_between(d1, d2):
     d1 = datetime.datetime.strptime(d1, "%Y-%m-%d")
@@ -23,6 +24,13 @@ class FamilyReport(object):
 
     def generate_email(self):
         pass
+
+    def get_weather(selfs):
+        pass
+        '''
+        http: // api.openweathermap.org / data / 2.5 / forecast / daily?id = 6167865 & cnt = 1 & appid = 15
+        a7af1f2a637ff05597faf4d2884ef3 & units = metric
+        '''
 
     def send_email(self):
 
@@ -42,9 +50,6 @@ class FamilyReport(object):
         days_since_landing = days_between(date_of_landing, date_of_today)
 
         mail_msg = """
-        <h3>This is an automatically generated email, however, you can reply if you insist.</h3>
-        <h3>To unsubscribe, please discuss with your husband in person.</h3>
-        <hr />
         <h2>Date information</h2>
         <p>Today is <b>{date}</b>, <b>{week}</b>, the {doy} day in this year.</p>
         <p>This year's progress is as follows: </p>
@@ -54,6 +59,10 @@ class FamilyReport(object):
         <p>We've landed in Toronto for {dsl} days, and spent ${cost} on food.</p>
         <p>Our average daily expense on food is: <b> ${cpd} / d </b>.</p>
         <hr />
+        <h5>This is an automatically generated email, however, you can reply if you insist.</h5>
+        <h5>To unsubscribe, please discuss with your husband in person.</h5>
+        <hr />
+        <h5>Have a nice day!</h5>
         """.format(date=date_of_today, week=day_of_week, doy=ord(int(day_of_year)),
                    progress=progress_bar, dsl=days_since_landing, cost=cost, cpd=round(float(cost)/days_since_landing, 2))
         message = MIMEText(mail_msg, 'html', 'utf-8')
@@ -81,4 +90,6 @@ class FamilyReport(object):
 if __name__ == '__main__':
     # main process
     family_report = FamilyReport()
-    family_report.run()
+    r = requests.get('https://api.github.com/events')
+    print(r.content)
+    # family_report.run()
