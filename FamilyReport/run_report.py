@@ -42,7 +42,6 @@ def summarize_weather(list_weather):
             weather_summary = v
     return weather_summary
 
-
 class FamilyReport(object):
 
     def __init__(self):
@@ -144,14 +143,14 @@ class FamilyReport(object):
         <p>{progress}</p>
         <hr />
         {weather_info}
+        <hr />
         <h2>Expenses on food</h2>
         <p>We've landed in Toronto for {dsl} days, and spent ${cost} on food.</p>
         <p>Our average daily expense on food is: <b> ${cpd} / d </b>.</p>
         <hr />
-        <h5>This is an automatically generated email, however, you can reply if you insist.</h5>
-        <h5>To unsubscribe, please discuss with your husband in person.</h5>
-        <hr />
-        <h5>Have a nice day!</h5>
+        <h4>This is an automatically generated email, however, you can reply if you insist. To unsubscribe, please discuss with your husband in person.</h4>
+        --------------
+        <h4>Have a nice day!</h4>
         </body>
         </html>
         """.format(date=date_of_today, week=day_of_week, doy=ord(int(day_of_year)),
@@ -178,7 +177,6 @@ class FamilyReport(object):
 
     def run(self):
         self.send_email()
-
 
 if __name__ == '__main__':
     # main process
