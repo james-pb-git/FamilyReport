@@ -71,10 +71,9 @@ class FamilyReport(object):
             print("send ...")
             server.sendmail(conf.sender, conf.receivers, message.as_string())
             server.quit()
-            print("邮件发送成功")
+            print("Successfully sent email.")
         except smtplib.SMTPException as e:
             print(e)
-            print("Error: 无法发送邮件")
 
     def run(self):
         self.send_email()
