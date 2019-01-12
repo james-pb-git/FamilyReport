@@ -1,6 +1,7 @@
 import sys
 import smtplib
-import datetime
+from datetime import datetime
+from dateutil import tz
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import formataddr
@@ -10,9 +11,17 @@ from data import conf
 import requests
 
 def days_between(d1, d2):
-    d1 = datetime.datetime.strptime(d1, "%Y-%m-%d")
-    d2 = datetime.datetime.strptime(d2, "%Y-%m-%d")
+    d1 = datetime.strptime(d1, "%Y-%m-%d")
+    d2 = datetime.strptime(d2, "%Y-%m-%d")
     return abs((d2 - d1).days)
+
+def utc_to_est(utc_timestamp):
+    from_zone = tz.gettz('UTC')
+    to_zone = tz.gettz('EST')
+    utc_time = datetime.fromtimestamp(utc_timestamp)
+    utc_time = utc_time.replace(tzinfo=from_zone)
+    local_time = utc_time.astimezone(to_zone)
+    return local_time.strftime('%Y-%m-%d %H:%M:%S')
 
 def ord(n):
     return str(n)+("th" if 4 <= n%100 <= 20 else {1:"st",2:"nd",3:"rd"}.get(n%10, "th"))
@@ -26,11 +35,20 @@ class FamilyReport(object):
         pass
 
     def get_weather(selfs):
-        pass
-        '''
-        http: // api.openweathermap.org / data / 2.5 / forecast / daily?id = 6167865 & cnt = 1 & appid = 15
-        a7af1f2a637ff05597faf4d2884ef3 & units = metric
-        '''
+        payload = {'id': conf.city_id,
+                   'appid': conf.weather_app_id,
+                   'units': 'metric',
+        }
+        weather_url = 'http://api.openweathermap.org/data/2.5/forecast?'
+        weather_response = requests.get(weather_url, params=payload)
+        weather_response.raise_for_status() # If not 200, raise exception
+        res = weather_response.json()
+        for item in res['list']:
+            out_str = utc_to_est(item['dt'])
+            out_str += " " + str(item['main']['temp'])
+            out_str += " " + item['weather'][0]['main'] + " " + item['weather'][0]['description']
+            print(out_str)
+        return res
 
     def send_email(self):
 
@@ -90,6 +108,5 @@ class FamilyReport(object):
 if __name__ == '__main__':
     # main process
     family_report = FamilyReport()
-    r = requests.get('https://api.github.com/events')
-    print(r.content)
+    family_report.get_weather()
     # family_report.run()
