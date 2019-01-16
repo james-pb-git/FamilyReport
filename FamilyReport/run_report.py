@@ -50,6 +50,24 @@ class FamilyReport(object):
     def generate_email(self):
         pass
 
+    def get_exchange_rate(self):
+        exchange_rate_url = 'https://api.exchangeratesapi.io/latest?'
+        payload = {'base': 'CNY'}
+        exchange_rate_r = requests.get(exchange_rate_url, params=payload)
+        exchange_rate_r.raise_for_status() # If not OK (200), raise exception
+        res = exchange_rate_r.json()
+        date_calculated = res['date']
+        CAD_rate = 1.0 / res['rates']['CAD'] * 100
+        USD_rate = 1.0 / res['rates']['USD'] * 100
+
+        text = '''
+        <h2>Exchange rate</h2>
+        <p><font size="5" color="#E74C3C">100 CAD = {cad_rate:.2f} CNY</font></p>
+        <p><font size="5" color="#E74C3C">100 USD = {usd_rate:.2f} CNY</font></p>
+        <h4> The above information is provided by European Central Bank, updated on {date}. </h4>
+        '''.format(cad_rate=CAD_rate, usd_rate=USD_rate, date=date_calculated)
+        return text
+
     def get_weather(self):
         payload = {'id': conf.city_id,
                    'appid': conf.weather_app_id,
@@ -91,6 +109,8 @@ class FamilyReport(object):
         percent = round((float(day_of_year) + 0.0) / 3.65, 1)
         progress_bar = str(percent) + '% |' + round(percent) * '#' + (100 - int(percent)) * '-' + '|'
 
+        # Exchange rate
+        exchange_rate_info = self.get_exchange_rate()
         # Weather
         list_weather = self.get_weather()
         str_forecast = ''
@@ -121,7 +141,7 @@ class FamilyReport(object):
         weather_info = '''
         <h2>Weather information</h2>
         <table>
-        <caption>Weather forecast of the following 5 days</caption>
+        <caption>Weather forecast of the following 6 days</caption>
         <tr><th>Date</th><th>Min Temp.</th><th>Max Temp.</th><th>Weather</th></tr>
         {forecast}
         </table>
@@ -140,13 +160,15 @@ class FamilyReport(object):
         <h2>Date information</h2>
         <p>Today is <b>{date}</b>, <b>{week}</b>, the {doy} day in this year.</p>
         <p>This year's progress is as follows: </p>
-        <p>{progress}</p>
+        <p><font size="4" color="#3498DB">{progress}</font></p>
         <hr />
-        {weather_info}
+        {exchange_rate_info}
         <hr />
         <h2>Expenses on food</h2>
         <p>We've landed in Toronto for {dsl} days, and spent ${cost} on food.</p>
-        <p>Our average daily expense on food is: <b> ${cpd} / d </b>.</p>
+        <p>Our average daily expense on food is: <font size="5" color="#E74C3C"> ${cpd} / d </font>.</p>
+        <hr />
+        {weather_info}
         <hr />
         <h4>This is an automatically generated email, however, you can reply if you insist. To unsubscribe, please discuss with your husband in person.</h4>
         --------------
@@ -154,7 +176,7 @@ class FamilyReport(object):
         </body>
         </html>
         """.format(date=date_of_today, week=day_of_week, doy=ord(int(day_of_year)),
-                   weather_info=weather_info,style=style,
+                   weather_info=weather_info,style=style,exchange_rate_info=exchange_rate_info,
                    progress=progress_bar, dsl=days_since_landing, cost=cost, cpd=round(float(cost)/days_since_landing, 2))
         message = MIMEText(mail_msg, 'html', 'utf-8')
         message['From'] = Header("Bo Pang", 'utf-8')
@@ -182,3 +204,4 @@ if __name__ == '__main__':
     # main process
     family_report = FamilyReport()
     family_report.run()
+    # family_report.get_exchange_rate()
