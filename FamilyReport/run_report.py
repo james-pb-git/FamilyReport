@@ -105,6 +105,7 @@ class FamilyReport(object):
         date_of_today = date.today().strftime("%Y-%m-%d")
         day_of_year = date.today().strftime("%j")
         day_of_week = date.today().strftime("%A")
+        weekday_of_today = date.today().weekday()
         # week_of_year = date.today().strftime("%W")
         percent = round((float(day_of_year) + 0.0) / 3.65, 1)
         progress_bar = str(percent) + '% |' + round(percent) * '#' + (100 - int(percent)) * '-' + '|'
@@ -191,7 +192,11 @@ class FamilyReport(object):
             print("login ...")
             server.login(conf.sender, conf.mail_pswd)
             print("send ...")
-            server.sendmail(conf.sender, conf.receivers, message.as_string())
+            receivers_today = conf.receivers
+            if weekday_of_today in [1, 3, 5]:
+                receivers_today += conf.conditional_receivers
+            print("Today's receivers are: " + ", ".join(receivers_today))
+            server.sendmail(conf.sender, receivers_today, message.as_string())
             server.quit()
             print("Successfully sent email.")
         except smtplib.SMTPException as e:
