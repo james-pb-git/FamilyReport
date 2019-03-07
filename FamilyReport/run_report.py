@@ -108,7 +108,10 @@ class FamilyReport(object):
         weekday_of_today = date.today().weekday()
         # week_of_year = date.today().strftime("%W")
         percent = round((float(day_of_year) + 0.0) / 3.65, 1)
-        progress_bar = str(percent) + '% |' + round(percent) * '#' + (100 - int(percent)) * '-' + '|'
+        progress_bar = str(percent) + '% <br />'
+        tmp_bar = round(percent) * '\u25A0' + (100 - int(percent)) * '\u25A1'
+        for idx in range(10):
+            progress_bar += '\u25c0' + tmp_bar[idx*10:idx*10+10] + '\u25b6<br />'
 
         # Exchange rate
         exchange_rate_info = self.get_exchange_rate()
@@ -151,7 +154,7 @@ class FamilyReport(object):
         df = pd.read_csv(conf.data_path + '/' + 'food_expense', sep='\t')
         cost = round(df['Expense'].sum(), 2)
         days_since_landing = days_between(date_of_landing, date_of_today)
-        mail_msg = """
+        mail_msg = u"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -161,7 +164,7 @@ class FamilyReport(object):
         <h2>Date information</h2>
         <p>Today is <b>{date}</b>, <b>{week}</b>, the {doy} day in this year.</p>
         <p>This year's progress is as follows: </p>
-        <p><font size="4" color="#3498DB">{progress}</font></p>
+        <p><font size="4" color="#3498DB" style="line-height:50%">{progress}</font></p>
         <hr />
         {exchange_rate_info}
         <hr />
